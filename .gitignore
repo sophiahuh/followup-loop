@@ -1,0 +1,8 @@
+# the live database is customer data, not code
+followup.db
+followup.db-*
+__pycache__/
+*.pyc
+*.log
+.env
+.DS_Store
