@@ -61,13 +61,19 @@ HOST_CALENDARS = [
 
 # Existing customers sitting in the interested set. Their calendar events are
 # recurring account syncs, not demos — they must not generate follow-ups or
-# disposition questions.
-CUSTOMER_DOMAINS = {
-    # confirmed customers — never prospect, never ask for a meeting disposition
-    "supergood.ai", "hypernatural.ai", "onghost.com", "greybeam.ai",
-    "nemasystems.io", "cedarcopilot.com", "bondtrials.com", "joinbond.com",
-    "salad.com", "brew.new", "getbrew.ai", "praxie.com", "natural.com",
-}
+# disposition questions. The list itself is customer data, so it lives OUTSIDE
+# the repo: one domain per line in customers.txt next to this package (gitignored),
+# or comma-separated in CUSTOMER_DOMAINS in the environment.
+def _customer_domains() -> set:
+    raw = os.environ.get("CUSTOMER_DOMAINS", "")
+    f = pathlib.Path(__file__).resolve().parent.parent / "customers.txt"
+    if not raw.strip() and f.exists():
+        # drop comment lines BEFORE joining, or a comma inside a comment becomes an entry
+        raw = ",".join(l for l in f.read_text().splitlines() if l.strip() and not l.strip().startswith("#"))
+    return {d.strip().lower() for d in raw.split(",") if d.strip()}
+
+
+CUSTOMER_DOMAINS = _customer_domains()
 
 FREE_EMAIL_DOMAINS = {
     "gmail.com", "googlemail.com", "outlook.com", "hotmail.com", "live.com",
